@@ -1,6 +1,5 @@
 package com.naruto.treestructrue.base;
 
-import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +26,6 @@ public abstract class BaseTreeAdapter<T extends BaseTreeBean, V extends BaseTree
     private IGetChildData<T> iGetChildData;
     private Map<String, List<T>> cacheData = new HashMap<>();//缓存数据
     private Pair<String, Integer> waitingDataKey;//记录待展开的数据的key和位置，异步获取数据时避免混乱
-    private static final String TAG = "BaseTreeAdapter";
 
     public BaseTreeAdapter(List<T> dataList, IGetChildData<T> iGetChildData) {
         this.dataList = dataList;
@@ -69,6 +67,10 @@ public abstract class BaseTreeAdapter<T extends BaseTreeBean, V extends BaseTree
                     if (list == null) {//没有缓存数据，需要获取数据
                         iGetChildData.getData(t);
                     } else {//有缓存数据，无需再次获取
+                        //重置状态
+                        for (T t0 : list) {
+                            t0.isFold = true;
+                        }
                         showChildData(newParentId, list);
                     }
                 }
@@ -106,7 +108,6 @@ public abstract class BaseTreeAdapter<T extends BaseTreeBean, V extends BaseTree
      * @param childData
      */
     public void showChildData(String key, List<T> childData) {
-        Log.d(TAG, "showChildData: waitingDataKey.first=" + waitingDataKey.first + ";key=" + key);
         if (!cacheData.containsKey(key)) cacheData.put(key, childData);//缓存
         if (waitingDataKey.first.equals(key)) {
             int position = waitingDataKey.second + 1;
